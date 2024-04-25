@@ -1,0 +1,76 @@
+name: benchmark-group-2
+on: [pull_request, push]
+jobs:
+  start-runner:
+    name: Start self-hosted EC2 runner
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+      private-ip: ${{ steps.get-private-ip.outputs.private-ip }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ami-0318e02e8eea2b036
+          ec2-instance-type: c5.xlarge
+          subnet-id: subnet-0f0b102aeba4b75f7
+          security-group-id: sg-01dbe69e3eaf89995
+      - name: Get private IP address
+        id: get-private-ip
+        run: | 
+          echo "private-ip=$(aws ec2 describe-instances \
+           --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
+           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress')" \
+           >> $GITHUB_OUTPUT
+  run-server:
+    name: Start the ISTZIIO server
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner  
+    env:
+      SERVER_ROOT: ${{ github.workspace }}/server
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          repository: cmu-db/15721-s24-cache2
+      - name: start server nodes
+        run: ${{ github.workspace }}/server/run.sh
+      - name: wait for server completing setups
+        run: sleep 5
+      - name: test server
+        run: echo $(curl -L $SERVER_IP/s3/test1.txt)
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - do-the-job # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+          
