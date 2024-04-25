@@ -42,6 +42,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
     steps:
+      - name: debug
+        run: echo $SERVER_IP
       - name: Clone Server
         uses: actions/checkout@v4
         with:
@@ -51,7 +53,7 @@ jobs:
       - name: wait for server completing setups
         run: sleep 5
       - name: test server
-        run: echo $(curl -L $SERVER_IP/s3/test1.txt)
+        run: echo $(curl -L $SERVER_IP:26379/s3/test1.txt)
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
