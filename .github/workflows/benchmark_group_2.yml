@@ -48,6 +48,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: cmu-db/15721-s24-cache2
+          ref: benchmark
       - name: start server nodes
         run: ${{ github.workspace }}/server/run.sh
       - name: wait for server completing setups
