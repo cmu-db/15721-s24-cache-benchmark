@@ -28,15 +28,9 @@ jobs:
       - name: Get private IP address
         id: get-private-ip
         run: | 
-          aws ec2 describe-instances \
-           --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
-           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress'
           echo "private-ip=$(aws ec2 describe-instances \
            --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
-           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress')" 
-          echo "private-ip=$(aws ec2 describe-instances \
-           --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
-           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress')" \
+           --query 'Reservations[0].Instances[0].PrivateIpAddress')" \
            >> $GITHUB_OUTPUT
   run-server:
     name: Start the ISTZIIO server
@@ -44,8 +38,8 @@ jobs:
     runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner  
     env:
       SERVER_ROOT: ${{ github.workspace }}/server
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
     steps:
       - name: debug
