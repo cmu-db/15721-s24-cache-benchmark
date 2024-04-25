@@ -30,7 +30,7 @@ jobs:
         run: | 
           aws ec2 describe-instances \
            --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
-           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress')
+           --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress'
           echo "private-ip=$(aws ec2 describe-instances \
            --instance-id ${{ steps.start-ec2-runner.outputs.ec2-instance-id }} \
            --query 'Reservations[0].Instances[0].NetworkInterfaces[?Attachment.DeviceIndex==`1`].PrivateIpAddress')" 
