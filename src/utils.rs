@@ -5,15 +5,19 @@ use std::fs;
 use std::path::Path;
 
 pub fn setup_client_1() -> Box<dyn StorageClient> {
+    let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
+    println!("server url: {}", &server_url);
     let bench_files_path = "./bench_files".to_string();
     let map = create_table_file_map(&bench_files_path).unwrap();
-    Box::new(StorageClientImpl::new_for_test(1, map.clone()))
+    Box::new(StorageClientImpl::new_for_test(1, map.clone(), &server_url))
 }
 
 pub fn setup_client_2() -> Box<dyn StorageClient> {
+    let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
+    println!("server url: {}", &server_url);
     let bench_files_path = "./bench_files".to_string();
     let map = create_table_file_map(&bench_files_path).unwrap();
-    Box::new(StorageClientImpl::new_for_test(1, map.clone()))
+    Box::new(StorageClientImpl::new_for_test(1, map.clone(), &server_url))
 }
 
 pub fn create_table_file_map(directory: &str) -> Result<HashMap<TableId, String>, std::io::Error> {

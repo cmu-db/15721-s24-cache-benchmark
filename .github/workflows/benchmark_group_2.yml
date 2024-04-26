@@ -79,7 +79,7 @@ jobs:
       - run-server
     runs-on: ${{ needs.start-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
-      SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
+      SERVER_URL: http://${{ needs.start-runner.outputs.private-ip }}:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
