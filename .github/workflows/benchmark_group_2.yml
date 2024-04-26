@@ -54,7 +54,7 @@ jobs:
       - name: wait for server completing setups
         run: |
           sleep 5
-          cat ${{ github.workspace }}/server/logs/app_6379.log
+          cat ${{ github.workspace }}/logs/app_6379.log
       - name: test server
         run: echo $(curl -L $SERVER_IP:26379/s3/test1.txt)
   stop-runner:
