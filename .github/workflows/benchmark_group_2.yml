@@ -77,7 +77,7 @@ jobs:
     needs: 
       - start-runner
       - run-server
-    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner  
+    runs-on: ${{ needs.start-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
     steps:
