@@ -1,7 +1,7 @@
 name: benchmark-group-2
 on: [pull_request, push]
 jobs:
-  start-runner:
+  start-server-runner:
     name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
     outputs:
@@ -34,13 +34,13 @@ jobs:
            >> $GITHUB_OUTPUT
   run-server:
     name: Start the ISTZIIO server
-    needs: start-runner # required to start the main job when the runner is ready
-    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner  
+    needs: start-server-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-server-runner.outputs.label }} # run the job on the newly created runner  
     env:
       SERVER_ROOT: ${{ github.workspace }}/server
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
-      SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
+      SERVER_IP: ${{ needs.start-server-runner.outputs.private-ip }}
     steps:
       - name: debug
         run: echo $SERVER_IP
@@ -59,11 +59,11 @@ jobs:
           sleep 5
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: test server
-        run: echo $(curl -L $SERVER_IP:26379/s3/test1.txt)
+        run: echo $(curl -sSL $SERVER_IP:26379/s3/test1.txt)
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
-      - start-runner # required to get output from the start-runner job
+      - start-server-runner # required to get output from the start-server-runner job
       - run-server # required to wait when the main job is done
     runs-on: ubuntu-latest
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
@@ -79,6 +79,6 @@ jobs:
         with:
           mode: stop
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          label: ${{ needs.start-runner.outputs.label }}
-          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
+          label: ${{ needs.start-server-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-server-runner.outputs.ec2-instance-id }}
           
