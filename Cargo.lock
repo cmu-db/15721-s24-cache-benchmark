@@ -1144,9 +1144,9 @@ dependencies = [
 
 [[package]]
 name = "istziio-client"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "feda472eadc96115c89589a1386278f9f429a4c9ed365e43adf493e474b974bc"
+checksum = "6438cfe6d09df4ae9f17e787d17214f985575623081fd3f4c597cbd66715ec12"
 dependencies = [
  "anyhow",
  "arrow",
