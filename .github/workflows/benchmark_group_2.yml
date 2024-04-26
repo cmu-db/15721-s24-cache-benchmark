@@ -53,11 +53,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
-      SCCACHE_GHA_ENABLED: "true"
-      RUSTC_WRAPPER: "sccache"
     steps:
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Clone Server
         uses: actions/checkout@v4
         with:
@@ -82,11 +78,7 @@ jobs:
     runs-on: ${{ needs.start-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       SERVER_URL: http://${{ needs.start-runner.outputs.private-ip }}:26379
-      SCCACHE_GHA_ENABLED: "true"
-      RUSTC_WRAPPER: "sccache"
     steps:
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.3
       - name: Clone Server
         uses: actions/checkout@v4
       - name: Run Benchmark
