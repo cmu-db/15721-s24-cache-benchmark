@@ -61,7 +61,7 @@ jobs:
           ref: benchmark
       - name: Build Server
         run: |
-          cargo build
+          cargo build --bin istziio_server_node
       - name: start server nodes
         run: ${{ github.workspace }}/server/run.sh
       - name: wait for server completing setups
