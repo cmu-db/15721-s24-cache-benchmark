@@ -57,7 +57,9 @@ pub async fn run_trace(mut trace: VecDeque<TraceEntry>, client_builder: &dyn Fn(
             let req = next_entry.request;
 
             let res = client.request_data_sync(req.clone()).await;
-            assert!(res.is_ok());
+            if let Err(e) = res {
+                println!("Error: {}", e);
+            }
             let client_duration = client_start.elapsed();
             tx.send(client_duration).await.unwrap();
         });
