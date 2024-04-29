@@ -23,6 +23,7 @@ jobs:
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
           ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
           subnet-id: ${{ vars.AWS_SUBNET_IP }}
@@ -32,6 +33,7 @@ jobs:
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
           ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
           subnet-id: ${{ vars.AWS_SUBNET_IP }}
@@ -104,12 +106,14 @@ jobs:
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-label }}
           ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
       - name: Stop Client EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.client-label }}
           ec2-instance-id: ${{ needs.start-runner.outputs.client-ec2-instance-id }}
           
