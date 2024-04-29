@@ -1,6 +1,6 @@
 name: test-group-1
 on: 
-  on: [push, pull_request, workflow_dispatch]
+  [push, pull_request, workflow_dispatch]
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
