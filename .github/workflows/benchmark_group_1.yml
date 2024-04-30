@@ -77,6 +77,8 @@ jobs:
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
+        with:
+          ref: cache1-bench
       - name: Build Benchmark driver
         run: cargo build
       - name: Wait for server
