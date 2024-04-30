@@ -63,8 +63,6 @@ jobs:
       - name: Run Server
         run: |
           cargo run --package storage-node --bin storage_node
-      - name: spin
-        run: sleep 5
   run-client:
     name: Run Parpulse client
     needs: 
@@ -92,7 +90,6 @@ jobs:
     name: Stop self-hosted EC2 runner
     needs:
       - start-runner # required to get output from the start-runner job
-      - run-server # required to wait when the main job is done
       - run-client
     runs-on: ubuntu-latest
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
