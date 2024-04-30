@@ -86,6 +86,9 @@ jobs:
           done
       - name: Run Client
         run: cargo run --package parpulse-client --bin driver
+      - name: Stop Server
+        run: |
+          curl --output /dev/null --silent --head $SERVER_URL/shutdown
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
