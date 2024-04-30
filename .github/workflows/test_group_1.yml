@@ -60,11 +60,13 @@ jobs:
         with:
           repository: cmu-db/15721-s24-cache1
           ref: lkl/benchmark
+      - name: Build Server
+        run: cargo build --package storage-node --bin storage_node
       - name: Run Server
         run: |
           cargo run --package storage-node --bin storage_node &
       - name: Spin and wait for the Client
-        run: sleep 360
+        run: sleep 60
   run-client:
     name: Run Parpulse client
     needs: 
