@@ -1,6 +1,12 @@
 name: benchmark-group-1
 on: 
-  [workflow_dispatch]
+  push:
+    branches:
+      - lkl/benchmark
+  pull_request:
+    branches:
+      - lkl/benchmark
+  workflow_dispatch:
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
