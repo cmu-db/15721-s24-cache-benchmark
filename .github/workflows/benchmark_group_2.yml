@@ -1,5 +1,10 @@
 name: benchmark-group-2
-on: [pull_request, push]
+on:
+  push:
+    branches:
+      - main
+      - gh-action-benchmark
+
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
