@@ -1,6 +1,12 @@
 name: benchmark-group-1
 on: 
-  [workflow_dispatch]
+  push:
+    branches:
+      - lkl/benchmark
+  pull_request:
+    branches:
+      - lkl/benchmark
+  workflow_dispatch:
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
@@ -9,8 +15,8 @@ jobs:
       server-label: ${{ steps.start-server-ec2-runner.outputs.label }}
       server-ec2-instance-id: ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }}
       private-ip: ${{ steps.get-private-ip.outputs.private-ip }}
-      client-label: ${{ steps.start-client-ec2-runner.outputs.label }}
-      client-ec2-instance-id: ${{ steps.start-client-ec2-runner.outputs.ec2-instance-id }}
+      benchmark-label: ${{ steps.start-benchmark-ec2-runner.outputs.label }}
+      benchmark-ec2-instance-id: ${{ steps.start-benchmark-ec2-runner.outputs.ec2-instance-id }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -28,8 +34,8 @@ jobs:
           ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
           subnet-id: ${{ vars.AWS_SUBNET_IP }}
           security-group-id: ${{ vars.AWS_SG_1 }}
-      - name: Start client EC2 runner
-        id: start-client-ec2-runner
+      - name: Start benchmark EC2 runner
+        id: start-benchmark-ec2-runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
@@ -77,11 +83,13 @@ jobs:
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
+        with:
+          ref: cache1-bench
       - name: Build Benchmark driver
         run: cargo build
       - name: Wait for server
         run: |
-          until curl --output /dev/null --silent --head --fail $SERVER_URL/; do
+          until curl --output /dev/null --silent --head --fail $SERVER_URL/heartbeat; do
               printf '.'
               sleep 5
           done

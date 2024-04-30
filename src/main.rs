@@ -5,6 +5,6 @@ use std::path::PathBuf;
 async fn main() {
     // benchmark_sync().await;
     // benchmark_parallel().await;
-    let trace = parse_trace(PathBuf::from("traces/trace1.csv")).unwrap();
+    let trace = parse_trace(PathBuf::from("traces/trace_100m.csv")).unwrap();
     run_trace(trace, &utils::setup_client_1).await;
 }
