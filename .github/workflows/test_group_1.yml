@@ -1,0 +1,125 @@
+name: test-group-1
+on: 
+  [workflow_dispatch]
+jobs:
+  start-runner:
+    name: Start self-hosted EC2 runner
+    runs-on: ubuntu-latest
+    outputs:
+      server-label: ${{ steps.start-server-ec2-runner.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }}
+      private-ip: ${{ steps.get-private-ip.outputs.private-ip }}
+      client-label: ${{ steps.start-client-ec2-runner.outputs.label }}
+      client-ec2-instance-id: ${{ steps.start-client-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Start Server EC2 runner
+        id: start-server-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
+          ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
+          subnet-id: ${{ vars.AWS_SUBNET_IP }}
+          security-group-id: ${{ vars.AWS_SG_1 }}
+      - name: Start client EC2 runner
+        id: start-client-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
+          ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
+          subnet-id: ${{ vars.AWS_SUBNET_IP }}
+          security-group-id: ${{ vars.AWS_SG_1 }}
+      - name: Get private IP address
+        id: get-private-ip
+        run: | 
+          echo "private-ip=$(aws ec2 describe-instances \
+           --instance-id ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }} \
+           --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
+           >> $GITHUB_OUTPUT
+  run-server:
+    name: Start the Parpulse server
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the newly created runner  
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_1_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_1_S3_SECRET_ACCESS_KEY }}
+
+      SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          repository: cmu-db/15721-s24-cache1
+          ref: lkl/benchmark
+      - name: Build Server
+        run: cargo build --package storage-node --bin storage_node
+      - name: Run Server
+        run: |
+          cargo run --package storage-node --bin storage_node &
+      - name: Spin and wait for the Client
+        run: sleep 120
+  run-client:
+    name: Run Parpulse client
+    needs: 
+      - start-runner
+    runs-on: ${{ needs.start-runner.outputs.client-label }} # run the job on the newly created runner  
+    env:
+      SERVER_URL: http://${{ needs.start-runner.outputs.private-ip }}:3030
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          repository: cmu-db/15721-s24-cache1
+          ref: lkl/benchmark
+      - name: Build Client driver
+        run: cargo build --package parpulse-client --bin driver
+      - name: Wait for server
+        run: |
+          until curl --output /dev/null --silent --head --fail $SERVER_URL/heartbeat; do
+              printf '.'
+              sleep 5
+          done
+      - name: Run Client
+        run: cargo run --package parpulse-client --bin driver
+      - name: Stop Server
+        run: |
+          curl --output /dev/null --silent --head $SERVER_URL/shutdown
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - run-client
+      - run-server
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Force stop Server EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.server-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+      - name: Stop Client EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.client-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.client-ec2-instance-id }}
+          
