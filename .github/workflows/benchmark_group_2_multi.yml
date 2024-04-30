@@ -93,6 +93,9 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip-1 }}
+      NODE_1_IP: ${{ needs.start-runner.outputs.private-ip-1 }}
+      NODE_2_IP: ${{ needs.start-runner.outputs.private-ip-2 }}
+      NODE_3_IP: ${{ needs.start-runner.outputs.private-ip-3 }}
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -119,6 +122,9 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip-2 }}
+      NODE_1_IP: ${{ needs.start-runner.outputs.private-ip-1 }}
+      NODE_2_IP: ${{ needs.start-runner.outputs.private-ip-2 }}
+      NODE_3_IP: ${{ needs.start-runner.outputs.private-ip-3 }}
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -145,6 +151,9 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip-3 }}
+      NODE_1_IP: ${{ needs.start-runner.outputs.private-ip-1 }}
+      NODE_2_IP: ${{ needs.start-runner.outputs.private-ip-2 }}
+      NODE_3_IP: ${{ needs.start-runner.outputs.private-ip-3 }}
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -199,12 +208,26 @@ jobs:
           aws-access-key-id: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
-      - name: Stop Server EC2 runner
+      - name: Stop Server 1 EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          label: ${{ needs.start-runner.outputs.server-label }}
+          label: ${{ needs.start-runner.outputs.server-1-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+      - name: Stop Server 2 EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.server-2-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+      - name: Stop Server 3 EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.server-3-label }}
           ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
       - name: Stop Benchmark EC2 runner
         uses: machulav/ec2-github-runner@v2
