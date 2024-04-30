@@ -103,13 +103,13 @@ jobs:
           aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
-      - name: Stop Server EC2 runner
+      - name: Force stop Server EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
           github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-label }}
-          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }} --force
       - name: Stop Client EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
