@@ -1,6 +1,9 @@
 name: test-group-1
 on: 
-  [workflow_dispatch]
+  [workflow_dispatch, push, pull_request]
+  - branches:
+      - lkl/benchmark
+
 jobs:
   start-runner:
     name: Start self-hosted EC2 runner
@@ -64,9 +67,7 @@ jobs:
         run: cargo build --package storage-node --bin storage_node
       - name: Run Server
         run: |
-          cargo run --package storage-node --bin storage_node &
-      - name: Spin and wait for the Client
-        run: sleep 120
+          cargo run --package storage-node --bin storage_node
   run-client:
     name: Run Parpulse client
     needs: 
@@ -92,7 +93,7 @@ jobs:
         run: cargo run --package parpulse-client --bin driver
       - name: Stop Server
         run: |
-          curl --output /dev/null --silent --head $SERVER_URL/shutdown
+          curl -X POST $SERVER_URL/shutdown
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
