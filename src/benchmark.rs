@@ -1,4 +1,3 @@
-use csv;
 use istziio_client::client_api::{StorageClient, StorageRequest};
 use std::error::Error;
 use std::path::PathBuf;
@@ -59,9 +58,8 @@ pub async fn run_trace(
                 i, table_id, trace.timestamp
             );
             let client_start = Instant::now();
-            let req = trace.request;
 
-            let res = client.request_data(req.clone()).await;
+            let res = client.request_data(trace.request).await;
             if res.is_err() {
                 println!("Error: {}", res.as_ref().err().unwrap());
             }
