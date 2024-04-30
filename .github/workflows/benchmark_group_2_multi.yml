@@ -214,21 +214,21 @@ jobs:
           mode: stop
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-1-label }}
-          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-1-ec2-instance-id }}
       - name: Stop Server 2 EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-2-label }}
-          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-2-ec2-instance-id }}
       - name: Stop Server 3 EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: stop
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-3-label }}
-          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-3-ec2-instance-id }}
       - name: Stop Benchmark EC2 runner
         uses: machulav/ec2-github-runner@v2
         with:
