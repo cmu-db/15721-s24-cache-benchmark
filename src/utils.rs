@@ -5,7 +5,6 @@ use std::collections::HashMap;
 
 pub fn setup_client_1() -> Box<dyn StorageClient> {
     let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:3030"));
-    println!("server url: {}", &server_url);
     Box::new(ParpulseStorageClientImpl::new(&server_url, "http://127.0.0.1:3031").unwrap())
 }
 
