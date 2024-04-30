@@ -1,6 +1,8 @@
 use istziio_client::client_api::{StorageClient, StorageRequest};
+use prettytable::{Cell, Row, Table};
 use std::error::Error;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use std::thread::sleep;
 use std::time::Instant;
 use std::time::{Duration, SystemTime};
@@ -40,7 +42,16 @@ pub async fn run_trace(
     let start_time = SystemTime::now();
     let request_num = traces.len();
     let (tx, mut rx) = mpsc::channel(32);
+    let table = Arc::new(Mutex::new(Table::new()));
+    table.lock().unwrap().add_row(Row::new(vec![
+        Cell::new("Trace ID"),
+        Cell::new("File ID"),
+        Cell::new("Num Rows"),
+        Cell::new("Arrival Time"),
+        Cell::new("Wait Time"),
+    ]));
     for (i, trace) in traces.into_iter().enumerate() {
+        let table = Arc::clone(&table);
         if let Some(diff) =
             Duration::from_millis(trace.timestamp).checked_sub(start_time.elapsed().unwrap())
         {
@@ -53,10 +64,10 @@ pub async fn run_trace(
                 StorageRequest::Table(id) => id,
                 _ => panic!("Invalid request type"),
             };
-            println!(
-                "Trace {} sends request for table {} at timestamp {}",
-                i, table_id, trace.timestamp
-            );
+            // println!(
+            //     "Trace {} sends request for table {} at timestamp {}",
+            //     i, table_id, trace.timestamp
+            // );
             let client_start = Instant::now();
 
             let res = client.request_data(trace.request).await;
@@ -69,10 +80,17 @@ pub async fn run_trace(
                 total_num_rows += rb.num_rows();
             }
             let client_duration = client_start.elapsed();
-            println!(
-                "Trace {} gets {} rows from the client, latency is {:?}",
-                i, total_num_rows, client_duration
-            );
+            // println!(
+            //     "Trace {} gets {} rows from the client, latency is {:?}",
+            //     i, total_num_rows, client_duration
+            // );
+            table.lock().unwrap().add_row(Row::new(vec![
+                Cell::new(&i.to_string()),
+                Cell::new(&table_id.to_string()),
+                Cell::new(&total_num_rows.to_string()),
+                Cell::new(&trace.timestamp.to_string()),
+                Cell::new(&client_duration.as_millis().to_string()),
+            ]));
             tx.send(client_duration).await.unwrap();
         });
     }
@@ -85,5 +103,6 @@ pub async fn run_trace(
     }
 
     let avg_duration = duration_sum.div_f32(request_num as f32);
+    table.lock().unwrap().printstd();
     println!("Average duration: {:?}", avg_duration);
 }
