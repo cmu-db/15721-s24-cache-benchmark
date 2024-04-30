@@ -168,7 +168,7 @@ jobs:
       - name: wait for server completing setups
         run: |
           sleep 5
-          curl -sSL ${{ needs.start-runner.outputs.private-ip-3 }}/s3/test1.txt -o test1
+          curl -sSL ${{ needs.start-runner.outputs.private-ip-3 }}:26379/s3/test1.txt -o test1
           cat test1
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: spin
