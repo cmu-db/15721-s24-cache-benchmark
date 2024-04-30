@@ -2,10 +2,10 @@ name: benchmark-group-1
 on: 
   push:
     branches:
-      - lkl/benchmark
+      - cache1-bench
   pull_request:
     branches:
-      - lkl/benchmark
+      - cache1-bench
   workflow_dispatch:
 jobs:
   start-runner:
@@ -65,14 +65,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: cmu-db/15721-s24-cache1
-          ref: lkl/benchmark
+          ref: cache1-bench
       - name: Build Server
         run: cargo build --package storage-node --bin storage_node
       - name: Run Server
         run: |
-          cargo run --package storage-node --bin storage_node &
-      - name: Spin and wait for the Client
-        run: sleep 60
+          cargo run --package storage-node --bin storage_node
   run-benchmark:
     name: Run Benchmark
     needs: 
@@ -95,6 +93,9 @@ jobs:
           done
       - name: Run Benchmark
         run: cargo run
+      - name: Stop Server
+        run: |
+          curl -X POST $SERVER_URL/shutdown
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
