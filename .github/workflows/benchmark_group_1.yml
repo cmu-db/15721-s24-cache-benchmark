@@ -12,8 +12,8 @@ jobs:
     name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
     strategy:
-    matrix:
-      runner: ['server', 'benchmark']
+      matrix:
+        runner: ['server', 'benchmark']
     outputs:
       server-label: ${{ steps.start-server-ec2-runner.outputs.label }}
       server-ec2-instance-id: ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }}
