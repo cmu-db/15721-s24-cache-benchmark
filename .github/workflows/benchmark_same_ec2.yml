@@ -54,6 +54,7 @@ jobs:
     name: Run Benchmark
     needs: 
       - start-runner
+      - run-server
     runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the same machine
     env:
       SERVER_URL: http://localhost:3030
@@ -98,4 +99,3 @@ jobs:
           github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
           label: ${{ needs.start-runner.outputs.server-label }}
           ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
-          
