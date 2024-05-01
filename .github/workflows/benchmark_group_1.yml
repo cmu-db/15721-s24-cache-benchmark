@@ -8,7 +8,7 @@ on:
       - cache1-bench
   workflow_dispatch:
 jobs:
-  start-runners:
+  start-runner:
     name: Start self-hosted EC2 runners
     runs-on: ubuntu-latest
     strategy:
