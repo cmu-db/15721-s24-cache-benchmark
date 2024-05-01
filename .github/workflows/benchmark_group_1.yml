@@ -11,6 +11,12 @@ jobs:
   start-runner:
     name: Start self-hosted EC2 runners
     runs-on: ubuntu-latest
+    outputs:
+      server-label: ${{ steps.start-runner-server.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
+      server-private-ip: ${{ steps.get-server-private-ip.outputs.private-ip }}
+      benchmark-label: ${{ steps.start-runner-benchmark.outputs.label }}
+      benchmark-ec2-instance-id: ${{ steps.start-runner-benchmark.outputs.ec2-instance-id }}
     strategy:
       matrix:
         runner_type: ['server', 'benchmark']
@@ -48,15 +54,9 @@ jobs:
         if: matrix.runner_type == 'server'
         run: |
           echo "server-private-ip=$(aws ec2 describe-instances \
-           --instance-id ${{ steps.start-runner-server.outputs.ec2-instance-id }} \
+           --instance-id ${{ steps.start-runner.outputs.server-ec2-instance-id }} \
            --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
            >> $GITHUB_OUTPUT
-    outputs:
-      server-label: ${{ steps.start-runner-server.outputs.label }}
-      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
-      server-private-ip: ${{ steps.get-server-private-ip.outputs.private-ip }}
-      benchmark-label: ${{ steps.start-runner-benchmark.outputs.label }}
-      benchmark-ec2-instance-id: ${{ steps.start-runner-benchmark.outputs.ec2-instance-id }}
   run-server:
     name: Start the Parpulse server
     needs: start-runner # required to start the main job when the runner is ready
