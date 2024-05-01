@@ -1318,9 +1318,9 @@ dependencies = [
 
 [[package]]
 name = "istziio-client"
-version = "0.1.6"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "332d29ce1336316dc7e49fc3fff6e86eecdcb8baeba0741c057b36379bef77ad"
+checksum = "f68ef663a75430e75e1f7a80846724cfa85d4dec578d3a526ae222c9cadef433"
 dependencies = [
  "anyhow",
  "arrow",
@@ -1783,9 +1783,9 @@ dependencies = [
 
 [[package]]
 name = "parpulse-client"
-version = "0.1.1"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d605ad98f50173ca487a9ee9a63a0ad19087d9af95d3c71252e6f0a29425053"
+checksum = "0c420d9097ddef04e9d03a9662093ed4ed3ed02fecd58dcacf4881c9bd83e718"
 dependencies = [
  "anyhow",
  "arrow",

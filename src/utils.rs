@@ -16,6 +16,7 @@ pub fn setup_client_2() -> Box<dyn StorageClient> {
         1,
         map.clone(),
         &server_url,
+        false,
     ))
 }
 

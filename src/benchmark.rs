@@ -1,4 +1,4 @@
-use istziio_client::client_api::{StorageClient, StorageRequest};
+use istziio_client::client_api::{DataRequest, StorageClient, StorageRequest};
 use prettytable::{Cell, Row, Table};
 use std::error::Error;
 use std::path::PathBuf;
@@ -24,11 +24,14 @@ pub enum ClientType {
 pub fn parse_trace(trace_path: PathBuf) -> Result<Vec<TraceEntry>, Box<dyn Error>> {
     let mut rdr = csv::Reader::from_path(trace_path)?;
     let mut traces = Vec::new();
-    for result in rdr.records() {
+    for (req_id, result) in rdr.records().enumerate() {
         let record = result?;
         traces.push(TraceEntry {
             timestamp: record.get(0).unwrap().parse().unwrap(),
-            request: StorageRequest::Table(record.get(1).unwrap().parse().unwrap()),
+            request: StorageRequest::new(
+                req_id,
+                DataRequest::Table(record.get(1).unwrap().parse().unwrap()),
+            ),
         });
     }
     Ok(traces)
@@ -50,8 +53,8 @@ pub async fn run_trace(
         let tx = tx.clone();
         let client = client_builder();
         tokio::spawn(async move {
-            let table_id = match trace.request {
-                StorageRequest::Table(id) => id,
+            let table_id = match trace.request.data_request() {
+                DataRequest::Table(id) => *id,
                 _ => panic!("Invalid request type"),
             };
             let client_start = Instant::now();
