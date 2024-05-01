@@ -1,4 +1,4 @@
-name: benchmark-same-ec2
+name: benchmark-same-ec2-group-1
 on: 
   push:
     branches:
@@ -51,7 +51,7 @@ jobs:
         run: cargo build --package storage-node --bin storage_node
       - name: Run Server
         run: |
-          cargo run --package storage-node --bin storage_node & >> ~/server.log
+          cargo run --package storage-node --bin storage_node >> ~/server.log &
 
       - name: Return to Home
         run: cd ~
