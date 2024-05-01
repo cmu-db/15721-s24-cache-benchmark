@@ -41,8 +41,8 @@ jobs:
       SERVER_ROOT: ${{ github.workspace }}/istziio/server
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
-      SERVER_IP: 127.0.0.1
-      SERVER_URL: 127.0.0.1:26379
+      SERVER_IP: http://127.0.0.1
+      SERVER_URL: http://127.0.0.1:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
