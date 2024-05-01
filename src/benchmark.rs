@@ -58,7 +58,12 @@ pub async fn run_trace(
 
             let res = client.request_data(trace.request).await;
             if res.is_err() {
-                println!("Error: {}", res.as_ref().err().unwrap());
+                println!(
+                    "Error: {} {} {}",
+                    res.as_ref().err().unwrap(),
+                    trace.timestamp,
+                    table_id
+                );
             }
             let mut rx = res.unwrap();
             let mut total_num_rows = 0;
