@@ -207,6 +207,7 @@ jobs:
   run-benchmark:
     name: Run Benchmark
     needs: 
+      - start-server-1-runner
       - start-benchmark-runner
     runs-on: ${{ needs.start-benchmark-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:

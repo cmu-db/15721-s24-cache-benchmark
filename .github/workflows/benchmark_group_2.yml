@@ -85,10 +85,11 @@ jobs:
   run-benchmark:
     name: Run Benchmark
     needs: 
+      - start-server-runner
       - start-benchmark-runner
     runs-on: ${{ needs.start-benchmark-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
-      SERVER_URL: http://${{ needs.start-benchmark-runner.outputs.private-ip }}:26379
+      SERVER_URL: http://${{ needs.start-server-runner.outputs.private-ip }}:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
