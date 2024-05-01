@@ -119,7 +119,10 @@ jobs:
            >> $GITHUB_OUTPUT
   run-server-1:
     name: Start the ISTZIIO server 1
-    needs: start-server-1-runner # required to start the main job when the runner is ready
+    needs: 
+      - start-server-1-runner 
+      - start-server-2-runner 
+      - start-server-3-runner  # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-server-1-runner.outputs.server-label }} # run the job on the newly created runner  
     env:
       SERVER_ROOT: ${{ github.workspace }}/server
@@ -148,7 +151,10 @@ jobs:
         run: sleep 60
   run-server-2:
     name: Start the ISTZIIO server 2
-    needs: start-server-2-runner # required to start the main job when the runner is ready
+    needs: 
+      - start-server-1-runner 
+      - start-server-2-runner 
+      - start-server-3-runner  # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-server-2-runner.outputs.server-label }} # run the job on the newly created runner  
     env:
       SERVER_ROOT: ${{ github.workspace }}/server
@@ -177,7 +183,10 @@ jobs:
         run: sleep 60
   run-server-3:
     name: Start the ISTZIIO server 3
-    needs: start-server-3-runner # required to start the main job when the runner is ready
+    needs: 
+      - start-server-1-runner 
+      - start-server-2-runner 
+      - start-server-3-runner # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-server-3-runner.outputs.server-label }} # run the job on the newly created runner  
     env:
       SERVER_ROOT: ${{ github.workspace }}/server
