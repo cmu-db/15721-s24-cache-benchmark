@@ -11,6 +11,9 @@ jobs:
   start-runner:
     name: Start self-hosted EC2 runner
     runs-on: ubuntu-latest
+    strategy:
+    matrix:
+      runner: ['server', 'benchmark']
     outputs:
       server-label: ${{ steps.start-server-ec2-runner.outputs.label }}
       server-ec2-instance-id: ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }}
@@ -24,18 +27,8 @@ jobs:
           aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
-      - name: Start Server EC2 runner
-        id: start-server-ec2-runner
-        uses: machulav/ec2-github-runner@v2
-        with:
-          mode: start
-          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
-          ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
-          subnet-id: ${{ vars.AWS_SUBNET_IP }}
-          security-group-id: ${{ vars.AWS_SG_1 }}
-      - name: Start benchmark EC2 runner
-        id: start-benchmark-ec2-runner
+      - name: Start EC2 runner
+        id: start-${{ matrix.runner }}-ec2-runner
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
@@ -61,11 +54,16 @@ jobs:
 
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
     steps:
-      - name: Clone Server
-        uses: actions/checkout@v4
-        with:
-          repository: cmu-db/15721-s24-cache1
-          ref: lkl/benchmark
+      # - name: Clone Server
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: cmu-db/15721-s24-cache1
+      #     ref: lkl/benchmark
+      - name: Enter the server directory
+        run: |
+          cd 15721-s24-cache1 
+          git checkout -b lkl/benchmark
+          git pull origin lkl/benchmark
       - name: Build Server
         run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
       - name: Run Server
