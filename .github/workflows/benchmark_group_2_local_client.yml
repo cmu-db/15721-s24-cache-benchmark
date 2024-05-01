@@ -49,7 +49,7 @@ jobs:
         with:
           path: 'istziio'
           repository: cmu-db/15721-s24-cache2
-          ref: benchmark
+          ref: main
       - name: Build Server
         working-directory: ${{ github.workspace }}/istziio
         run: |
@@ -71,6 +71,8 @@ jobs:
       - name: Run Benchmark
         working-directory: ${{ github.workspace }}/benchmark
         run: cargo run
+      - name: Server shut down and log
+        run: cat ${{ github.workspace }}/istziio/logs/app_6379.log
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:

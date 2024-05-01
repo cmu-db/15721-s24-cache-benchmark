@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: cmu-db/15721-s24-cache2
-          ref: benchmark
+          ref: main
       - name: Build Server
         run: |
           cargo build --bin istziio_server_node
@@ -82,6 +82,8 @@ jobs:
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: spin
         run: sleep 60
+      - name: Server shut down and log
+        run: cat ${{ github.workspace }}/logs/app_6379.log
   run-benchmark:
     name: Run Benchmark
     needs: 
