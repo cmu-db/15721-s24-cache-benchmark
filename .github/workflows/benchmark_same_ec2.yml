@@ -7,6 +7,7 @@ on:
     branches:
       - cache1-bench
   workflow_dispatch:
+
 jobs:
   start-runner:
     name: Start self-hosted EC2 runners
@@ -31,6 +32,7 @@ jobs:
           ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
           subnet-id: ${{ vars.AWS_SUBNET_IP }}
           security-group-id: ${{ vars.AWS_SG_1 }}
+
   run-server:
     name: Start the Parpulse server
     needs: start-runner # required to start the main job when the runner is ready
@@ -44,11 +46,10 @@ jobs:
         with:
           repository: cmu-db/15721-s24-cache1
           ref: lkl/benchmark
-      - name: Build Server
-        run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
       - name: Run Server
         run: |
-          cargo run --package storage-node --bin storage_node
+          cargo run --package storage-node --bin storage_node &
+
   run-benchmark:
     name: Run Benchmark
     needs: 
@@ -74,11 +75,13 @@ jobs:
       - name: Stop Server
         run: |
           curl -X POST $SERVER_URL/shutdown
+
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
       - start-runner # required to get output from the start-runner job
       - run-server # required to wait when the main job is done
+      - run-benchmark
     runs-on: ubuntu-latest
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
