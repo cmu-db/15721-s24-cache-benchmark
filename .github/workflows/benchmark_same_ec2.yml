@@ -2,10 +2,10 @@ name: benchmark-same-ec2
 on: 
   push:
     branches:
-      - cache1-bench
+      - cache1-same-ec2
   pull_request:
     branches:
-      - cache1-bench
+      - cache1-same-ec2
   workflow_dispatch:
 
 jobs:
@@ -47,6 +47,8 @@ jobs:
         with:
           repository: cmu-db/15721-s24-cache1
           ref: lkl/benchmark
+      - name: Build Server
+        run: cargo build --package storage-node --bin storage_node
       - name: Run Server
         run: |
           cargo run --package storage-node --bin storage_node &
@@ -56,7 +58,7 @@ jobs:
       - name: Clone Benchmark
         uses: actions/checkout@v4
         with:
-          ref: cache1-bench
+          ref: cache1-same-ec2
       - name: Build Benchmark driver
         run: cargo build
       - name: Wait for server
