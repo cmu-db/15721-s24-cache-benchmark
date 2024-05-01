@@ -67,7 +67,7 @@ jobs:
       - name: wait for server completing setups
         run: |
           sleep 5
-          cat ${{ github.workspace }}/logs/app_6379.log
+          cat ${{ github.workspace }}/istziio/logs/app_6379.log
       - name: Run Benchmark
         working-directory: ${{ github.workspace }}/benchmark
         run: cargo run
