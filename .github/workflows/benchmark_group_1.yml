@@ -67,7 +67,7 @@ jobs:
           repository: cmu-db/15721-s24-cache1
           ref: lkl/benchmark
       - name: Build Server
-        run: cargo build --package storage-node --bin storage_node
+        run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
       - name: Run Server
         run: |
           cargo run --package storage-node --bin storage_node
