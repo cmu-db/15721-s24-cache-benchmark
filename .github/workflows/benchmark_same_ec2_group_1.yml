@@ -41,46 +41,39 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_1_S3_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_1_S3_SECRET_ACCESS_KEY }}
       SERVER_URL: http://localhost:3030
-    strategy:
-      matrix:
-        runner_type: ['server', 'benchmark']
     steps:
       - name: Clone Server
-        if: matrix.runner_type == 'server'
         uses: actions/checkout@v4
         with:
           repository: cmu-db/15721-s24-cache1
           ref: lkl/benchmark
       - name: Build Server
-        if: matrix.runner_type == 'server'
         run: cargo build --package storage-node --bin storage_node
       - name: Run Server
-        if: matrix.runner_type == 'server'
         run: |
-          cargo run --package storage-node --bin storage_node &
+          cargo run --package storage-node --bin storage_node & >> ~/server.log
 
+      - name: Return to Home
+        run: cd ~
       - name: Clone Benchmark
-        if: matrix.runner_type == 'benchmark'
         uses: actions/checkout@v4
         with:
           ref: cache1-same-ec2
       - name: Build Benchmark driver
-        if: matrix.runner_type == 'benchmark'
         run: cargo build
       - name: Wait for server
-        if: matrix.runner_type == 'benchmark'
         run: |
           until curl --output /dev/null --silent --head --fail $SERVER_URL/heartbeat; do
               printf '.'
               sleep 5
           done
       - name: Run Benchmark
-        if: matrix.runner_type == 'benchmark'
         run: cargo run
       - name: Stop Server
-        if: matrix.runner_type == 'benchmark'
         run: |
           curl -X POST $SERVER_URL/shutdown
+      - name: Read server log
+        run: cat ~/server.log
       
   stop-runner:
     name: Stop self-hosted EC2 runner
