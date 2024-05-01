@@ -1,0 +1,97 @@
+name: benchmark-group-2-local-client
+on: [pull_request, push]
+
+jobs:
+  start-runner:
+    name: Start self-hosted EC2 runner
+    runs-on: ubuntu-latest
+    outputs:
+      server-label: ${{ steps.start-server-ec2-runner.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }}
+      private-ip: ${{ steps.get-private-ip.outputs.private-ip }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Start Server EC2 runner
+        id: start-server-ec2-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ami-0a1fee7d1926e55ce
+          ec2-instance-type: c5.xlarge
+          subnet-id: subnet-0f0b102aeba4b75f7
+          security-group-id: sg-01dbe69e3eaf89995
+      - name: Get private IP address
+        id: get-private-ip
+        run: | 
+          echo "private-ip=$(aws ec2 describe-instances \
+           --instance-id ${{ steps.start-server-ec2-runner.outputs.ec2-instance-id }} \
+           --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
+           >> $GITHUB_OUTPUT
+  run-server:
+    name: Start the ISTZIIO server
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the newly created runner  
+    env:
+      SERVER_ROOT: ${{ github.workspace }}/istziio/server
+      AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
+      SERVER_IP: 127.0.0.1
+      SERVER_URL: http://127.0.0.1:26379
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          path: 'istziio'
+          repository: cmu-db/15721-s24-cache2
+          ref: main
+      - name: Build Server
+        working-directory: ${{ github.workspace }}/istziio
+        run: |
+          cargo build --bin istziio_server_node
+      - name: Clone benchmark
+        uses: actions/checkout@v4
+        with:
+          path: 'benchmark'
+      - name: Build Benchmark driver
+        working-directory: ${{ github.workspace }}/benchmark
+        run: cargo build
+      - name: start server nodes
+        working-directory: ${{ github.workspace }}/istziio
+        run: server/run.sh
+      - name: wait for server completing setups
+        run: |
+          sleep 5
+          cat ${{ github.workspace }}/istziio/logs/app_6379.log
+      - name: Run Benchmark
+        working-directory: ${{ github.workspace }}/benchmark
+        run: cargo run
+      - name: Server shut down and log
+        run: cat ${{ github.workspace }}/istziio/logs/app_6379.log
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - run-server # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Stop Server EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.server-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          
