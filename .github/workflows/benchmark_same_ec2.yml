@@ -34,12 +34,13 @@ jobs:
           security-group-id: ${{ vars.AWS_SG_1 }}
 
   run-server:
-    name: Start the Parpulse server
+    name: Start the Parpulse server and run benchmark
     needs: start-runner # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the newly created runner  
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_1_S3_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_1_S3_SECRET_ACCESS_KEY }}
+      SERVER_URL: http://localhost:3030
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -50,16 +51,9 @@ jobs:
         run: |
           cargo run --package storage-node --bin storage_node &
 
-  run-benchmark:
-    name: Run Benchmark
-    needs: 
-      - start-runner
-      - run-server
-    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the same machine
-    env:
-      SERVER_URL: http://localhost:3030
-    steps:
-      - name: Clone Server
+      - name: Return to Home
+        run: cd ~
+      - name: Clone Benchmark
         uses: actions/checkout@v4
         with:
           ref: cache1-bench
@@ -76,13 +70,12 @@ jobs:
       - name: Stop Server
         run: |
           curl -X POST $SERVER_URL/shutdown
-
+      
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
       - start-runner # required to get output from the start-runner job
       - run-server # required to wait when the main job is done
-      - run-benchmark
     runs-on: ubuntu-latest
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
