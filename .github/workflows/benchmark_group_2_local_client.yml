@@ -62,7 +62,8 @@ jobs:
         working-directory: ${{ github.workspace }}/benchmark
         run: cargo build
       - name: start server nodes
-        run: ${{ github.workspace }}/istziio/server/run.sh
+        working-directory: ${{ github.workspace }}/istziio
+        run: server/run.sh
       - name: wait for server completing setups
         run: |
           sleep 5
