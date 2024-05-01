@@ -1,4 +1,5 @@
 use istziio_client::client_api::{StorageClient, StorageRequest};
+use prettytable::{Cell, Row, Table};
 use std::error::Error;
 use std::path::PathBuf;
 use std::thread::sleep;
@@ -53,10 +54,6 @@ pub async fn run_trace(
                 StorageRequest::Table(id) => id,
                 _ => panic!("Invalid request type"),
             };
-            println!(
-                "Trace {} sends request for table {} at timestamp {}",
-                i, table_id, trace.timestamp
-            );
             let client_start = Instant::now();
 
             let res = client.request_data(trace.request).await;
@@ -69,21 +66,51 @@ pub async fn run_trace(
                 total_num_rows += rb.num_rows();
             }
             let client_duration = client_start.elapsed();
-            println!(
-                "Trace {} gets {} rows from the client, latency is {:?}",
-                i, total_num_rows, client_duration
-            );
-            tx.send(client_duration).await.unwrap();
+            tx.send((
+                i,
+                table_id,
+                total_num_rows,
+                trace.timestamp,
+                client_duration,
+            ))
+            .await
+            .unwrap();
         });
     }
 
     // Collect and print client latencies
     let mut duration_sum = Duration::new(0, 0);
+    let mut rows = Vec::new();
     for _ in 0..request_num {
-        let client_duration = rx.recv().await.unwrap();
-        duration_sum += client_duration;
+        let tuple = rx.recv().await.unwrap();
+        rows.push(tuple);
+        duration_sum += tuple.4;
+    }
+
+    // Sort rows based on the first element of the tuple
+    rows.sort_by(|a, b| a.0.cmp(&b.0));
+
+    // Construct a table to print the results
+    let mut table = Table::new();
+    table.add_row(Row::new(vec![
+        Cell::new("Trace ID"),
+        Cell::new("File ID"),
+        Cell::new("Num Rows"),
+        Cell::new("Arrival Time"),
+        Cell::new("Wait Time"),
+    ]));
+
+    for row in rows {
+        table.add_row(Row::new(vec![
+            Cell::new(&row.0.to_string()),
+            Cell::new(&row.1.to_string()),
+            Cell::new(&row.2.to_string()),
+            Cell::new(&row.3.to_string()),
+            Cell::new(&row.4.as_millis().to_string()),
+        ]));
     }
 
     let avg_duration = duration_sum.div_f32(request_num as f32);
+    table.printstd();
     println!("Average duration: {:?}", avg_duration);
 }
