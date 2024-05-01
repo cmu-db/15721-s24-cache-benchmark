@@ -14,12 +14,6 @@ jobs:
     strategy:
       matrix:
         runner_type: ['server', 'benchmark']
-    outputs:
-      server-label: ${{ steps.start-runner-server.outputs.label }}
-      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
-      server-private-ip: ${{ steps.get-server-private-ip.outputs.private-ip }}
-      benchmark-label: ${{ steps.start-runner-benchmark.outputs.label }}
-      benchmark-ec2-instance-id: ${{ steps.start-runner-benchmark.outputs.ec2-instance-id }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -57,7 +51,12 @@ jobs:
            --instance-id ${{ steps.start-runner-server.outputs.ec2-instance-id }} \
            --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
            >> $GITHUB_OUTPUT
-
+    outputs:
+      server-label: ${{ steps.start-runner-server.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
+      server-private-ip: ${{ steps.get-server-private-ip.outputs.private-ip }}
+      benchmark-label: ${{ steps.start-runner-benchmark.outputs.label }}
+      benchmark-ec2-instance-id: ${{ steps.start-runner-benchmark.outputs.ec2-instance-id }}
   run-server:
     name: Start the Parpulse server
     needs: start-runner # required to start the main job when the runner is ready
@@ -89,7 +88,7 @@ jobs:
       - start-runner
     runs-on: ${{ needs.start-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
-      SERVER_URL: http://${{ needs.start-runner.outputs.private-ip }}:3030
+      SERVER_URL: http://${{ needs.start-runner.outputs.server-private-ip }}:3030
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
