@@ -15,11 +15,11 @@ jobs:
       matrix:
         runner_type: ['server', 'benchmark']
     outputs:
-      server-label: ${{ steps.start-runner.outputs.server-label }}
-      server-ec2-instance-id: ${{ steps.start-runner.outputs.server-ec2-instance-id }}
-      private-ip: ${{ steps.start-runner.outputs.private-ip }}
-      benchmark-label: ${{ steps.start-runner.outputs.benchmark-label }}
-      benchmark-ec2-instance-id: ${{ steps.start-runner.outputs.benchmark-ec2-instance-id }}
+      server-label: ${{ steps.start-runner-server.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
+      server-private-ip: ${{ steps.get-server-private-ip.outputs.private-ip }}
+      benchmark-label: ${{ steps.start-runner-benchmark.outputs.label }}
+      benchmark-ec2-instance-id: ${{ steps.start-runner-benchmark.outputs.ec2-instance-id }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -27,8 +27,9 @@ jobs:
           aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
-      - name: Start EC2 runner
-        id: start-runner
+      - name: Start Server EC2 runner
+        id: start-runner-server
+        if: matrix.runner_type == 'server'
         uses: machulav/ec2-github-runner@v2
         with:
           mode: start
@@ -37,14 +38,26 @@ jobs:
           ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
           subnet-id: ${{ vars.AWS_SUBNET_IP }}
           security-group-id: ${{ vars.AWS_SG_1 }}
-          runner-type: ${{ matrix.runner_type }}
+      - name: Start Benchmark EC2 runner
+        id: start-runner-benchmark
+        if: matrix.runner_type == 'benchmark'
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
+          ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
+          subnet-id: ${{ vars.AWS_SUBNET_IP }}
+          security-group-id: ${{ vars.AWS_SG_1 }}
       - name: Get private IP address
-        id: get-private-ip
+        id: get-server-private-ip
+        if: matrix.runner_type == 'server'
         run: |
-          echo "${{ matrix.runner_type }}-private-ip=$(aws ec2 describe-instances \
-            --instance-id ${{ steps.start-runner.outputs.${{ matrix.runner_type }}-ec2-instance-id }} \
-            --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
-            >> $GITHUB_OUTPUT
+          echo "server-private-ip=$(aws ec2 describe-instances \
+           --instance-id ${{ steps.start-runner-server.outputs.ec2-instance-id }} \
+           --query 'Reservations[0].Instances[0].PrivateIpAddress' | tr -d '"')" \
+           >> $GITHUB_OUTPUT
+
   run-server:
     name: Start the Parpulse server
     needs: start-runner # required to start the main job when the runner is ready
