@@ -42,6 +42,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
+      SERVER_URL: ${{ needs.start-runner.outputs.private-ip }}:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -51,26 +52,15 @@ jobs:
       - name: Build Server
         run: |
           cargo build --bin istziio_server_node
+      - name: Clone benchmark
+        uses: actions/checkout@v4
+        with:
+          path: 'benchmark'
+      - name: Build Benchmark driver
+        working-directory: ${{ github.workspace }}/benchmark
+        run: cargo build
       - name: start server nodes
         run: ${{ github.workspace }}/server/run.sh
-      - name: wait for server completing setups
-        run: |
-          sleep 5
-          cat ${{ github.workspace }}/logs/app_6379.log
-      - name: spin
-        run: sleep 60
-  run-benchmark:
-    name: Run Benchmark
-    needs: 
-      - start-runner
-    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the newly created runner  
-    env:
-      SERVER_URL: http://${{ needs.start-runner.outputs.private-ip }}:26379
-    steps:
-      - name: Clone Server
-        uses: actions/checkout@v4
-      - name: Build Benchmark driver
-        run: cargo build
       - name: Wait for server
         run: |
           until curl --output /dev/null --silent --head --fail $SERVER_URL/; do
@@ -78,13 +68,13 @@ jobs:
               sleep 5
           done
       - name: Run Benchmark
+        working-directory: ${{ github.workspace }}/benchmark
         run: cargo run
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
       - start-runner # required to get output from the start-runner job
       - run-server # required to wait when the main job is done
-      - run-benchmark
     runs-on: ubuntu-latest
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     steps:
