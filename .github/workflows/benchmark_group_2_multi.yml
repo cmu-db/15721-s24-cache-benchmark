@@ -208,18 +208,35 @@ jobs:
     name: Run Benchmark
     needs: 
       - start-server-1-runner
+      - start-server-2-runner
+      - start-server-3-runner
       - start-benchmark-runner
     runs-on: ${{ needs.start-benchmark-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       SERVER_URL: http://${{ needs.start-server-1-runner.outputs.private-ip }}:26379
+      SERVER_1_URL: http://${{ needs.start-server-1-runner.outputs.private-ip }}:26379
+      SERVER_2_URL: http://${{ needs.start-server-2-runner.outputs.private-ip }}:26379
+      SERVER_3_URL: http://${{ needs.start-server-3-runner.outputs.private-ip }}:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
       - name: Build Benchmark driver
         run: cargo build
-      - name: Wait for server
+      - name: Wait for server 1
         run: |
-          until curl --output /dev/null --silent --head --fail $SERVER_URL/; do
+          until curl --output /dev/null --silent --head --fail $SERVER_1_URL/; do
+              printf '.'
+              sleep 5
+          done
+      - name: Wait for server 2
+        run: |
+          until curl --output /dev/null --silent --head --fail $SERVER_2_URL/; do
+              printf '.'
+              sleep 5
+          done
+      - name: Wait for server 3
+        run: |
+          until curl --output /dev/null --silent --head --fail $SERVER_3_URL/; do
               printf '.'
               sleep 5
           done
