@@ -1,0 +1,100 @@
+name: benchmark-same-ec2
+on: 
+  push:
+    branches:
+      - cache1-bench
+  pull_request:
+    branches:
+      - cache1-bench
+  workflow_dispatch:
+jobs:
+  start-runner:
+    name: Start self-hosted EC2 runners
+    runs-on: ubuntu-latest
+    outputs:
+      server-label: ${{ steps.start-runner-server.outputs.label }}
+      server-ec2-instance-id: ${{ steps.start-runner-server.outputs.ec2-instance-id }}
+      server-private-ip: ${{ steps.get-server-private-ip.outputs.server-private-ip }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: start
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ${{ vars.AWS_GROUP_1_IMAGE }}
+          ec2-instance-type: ${{ vars.AWS_EC2_TYPE }}
+          subnet-id: ${{ vars.AWS_SUBNET_IP }}
+          security-group-id: ${{ vars.AWS_SG_1 }}
+  run-server:
+    name: Start the Parpulse server
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the newly created runner  
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_1_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_1_S3_SECRET_ACCESS_KEY }}
+      SERVER_IP: ${{ needs.start-runner.outputs.server-private-ip }}
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          repository: cmu-db/15721-s24-cache1
+          ref: lkl/benchmark
+      - name: Build Server
+        run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
+      - name: Run Server
+        run: |
+          cargo run --package storage-node --bin storage_node
+  run-benchmark:
+    name: Run Benchmark
+    needs: 
+      - start-runner
+    runs-on: ${{ needs.start-runner.outputs.server-label }} # run the job on the same machine
+    env:
+      SERVER_URL: http://localhost:3030
+    steps:
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          ref: cache1-bench
+      - name: Build Benchmark driver
+        run: cargo build
+      - name: Wait for server
+        run: |
+          until curl --output /dev/null --silent --head --fail $SERVER_URL/heartbeat; do
+              printf '.'
+              sleep 5
+          done
+      - name: Run Benchmark
+        run: cargo run
+      - name: Stop Server
+        run: |
+          curl -X POST $SERVER_URL/shutdown
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - run-server # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.GROUP_1_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.GROUP_1_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Stop Server EC2 runner
+        uses: machulav/ec2-github-runner@v2
+        with:
+          mode: stop
+          github-token: ${{ secrets.GROUP_1_GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.server-label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.server-ec2-instance-id }}
+          
