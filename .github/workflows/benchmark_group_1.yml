@@ -68,16 +68,16 @@ jobs:
 
       SERVER_IP: ${{ needs.start-runner.outputs.private-ip }}
     steps:
-      # - name: Clone Server
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: cmu-db/15721-s24-cache1
-      #     ref: lkl/benchmark
-      - name: Enter the server directory
-        run: |
-          cd 15721-s24-cache1 
-          git checkout -b lkl/benchmark
-          git pull origin lkl/benchmark
+      - name: Clone Server
+        uses: actions/checkout@v4
+        with:
+          repository: cmu-db/15721-s24-cache1
+          ref: lkl/benchmark
+      # - name: Enter the server directory
+      #   run: |
+      #     cd 15721-s24-cache1 
+      #     git checkout -b lkl/benchmark
+      #     git pull origin lkl/benchmark
       - name: Build Server
         run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
       - name: Run Server
