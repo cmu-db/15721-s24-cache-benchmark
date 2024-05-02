@@ -552,6 +552,7 @@ dependencies = [
  "log",
  "parquet",
  "prettytable",
+ "rand",
  "reqwest",
  "rocket",
  "thiserror",

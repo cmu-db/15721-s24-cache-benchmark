@@ -2,6 +2,7 @@ use istziio_client::client_api::{StorageClient, TableId};
 use istziio_client::storage_client::StorageClientImpl;
 use std::collections::HashMap;
 use std::io::BufRead;
+use rand::Rng;
 
 pub fn setup_client_1() -> Box<dyn StorageClient> {
     let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
@@ -16,13 +17,18 @@ pub fn setup_client_1() -> Box<dyn StorageClient> {
 }
 
 pub fn setup_client_2() -> Box<dyn StorageClient> {
-    let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
+    let server_url_1: String = std::env::var("SERVER_1_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
+    let server_url_2: String = std::env::var("SERVER_2_URL").unwrap_or(String::from("http://127.0.0.1:26380"));
+    let server_url_3: String = std::env::var("SERVER_3_URL").unwrap_or(String::from("http://127.0.0.1:26381"));
+    let i = rand::thread_rng().gen_range(0..3);
+    let servers = [server_url_1, server_url_2, server_url_3];
+    let server_url = &servers[i];
     println!("server url: {}", &server_url);
     let map = create_table_file_map_from_list().unwrap();
     Box::new(StorageClientImpl::new_for_test(
         1,
         map.clone(),
-        &server_url,
+        server_url,
         false,
     ))
 }
