@@ -135,6 +135,8 @@ jobs:
     needs: 
       - start-server-runner
       - start-benchmark-1-runner
+      - start-benchmark-2-runner
+      - start-benchmark-3-runner
     runs-on: ${{ needs.start-benchmark-1-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       TRACE_FILE: trace_100m_1.csv
@@ -159,7 +161,9 @@ jobs:
     name: Run Benchmark
     needs: 
       - start-server-runner
+      - start-benchmark-1-runner
       - start-benchmark-2-runner
+      - start-benchmark-3-runner
     runs-on: ${{ needs.start-benchmark-2-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       TRACE_FILE: trace_100m_2.csv
@@ -184,6 +188,8 @@ jobs:
     name: Run Benchmark
     needs: 
       - start-server-runner
+      - start-benchmark-1-runner
+      - start-benchmark-2-runner
       - start-benchmark-3-runner
     runs-on: ${{ needs.start-benchmark-3-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
