@@ -7,14 +7,24 @@ pub fn setup_client_1() -> Box<dyn StorageClient> {
     let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
     println!("server url: {}", &server_url);
     let map = create_table_file_map().unwrap();
-    Box::new(StorageClientImpl::new_for_test(1, map.clone(), &server_url))
+    Box::new(StorageClientImpl::new_for_test(
+        1,
+        map.clone(),
+        &server_url,
+        false,
+    ))
 }
 
 pub fn setup_client_2() -> Box<dyn StorageClient> {
     let server_url = std::env::var("SERVER_URL").unwrap_or(String::from("http://127.0.0.1:26379"));
     println!("server url: {}", &server_url);
     let map = create_table_file_map_from_list().unwrap();
-    Box::new(StorageClientImpl::new_for_test(1, map.clone(), &server_url))
+    Box::new(StorageClientImpl::new_for_test(
+        1,
+        map.clone(),
+        &server_url,
+        false,
+    ))
 }
 
 pub fn create_table_file_map() -> Result<HashMap<TableId, String>, std::io::Error> {

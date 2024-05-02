@@ -1,4 +1,7 @@
-use client_benchmark::{benchmark::{parse_trace, run_trace}, utils};
+use client_benchmark::{
+    benchmark::{parse_trace, run_trace},
+    utils,
+};
 use std::path::PathBuf;
 
 #[tokio::main]
