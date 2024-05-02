@@ -103,7 +103,7 @@ jobs:
               sleep 5
           done
       - name: Run Benchmark
-        run: cargo run
+        run: cargo run -- --disk-cache-size 104857600
       - name: Stop Server
         run: |
           curl -X POST $SERVER_URL/shutdown
