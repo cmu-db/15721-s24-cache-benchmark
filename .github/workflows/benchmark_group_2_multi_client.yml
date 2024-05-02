@@ -1,8 +1,5 @@
 name: benchmark-group-2-multi-client
-on:
-  push:
-    tags:
-      - multi_client
+on: [push, pull_request]
 
 jobs:
   start-benchmark-1-runner:
