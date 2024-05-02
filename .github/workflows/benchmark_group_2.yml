@@ -21,7 +21,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -45,7 +45,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -65,6 +65,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.GROUP_2_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.GROUP_2_AWS_SECRET_ACCESS_KEY }}
       SERVER_IP: ${{ needs.start-server-runner.outputs.private-ip }}
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -92,6 +93,7 @@ jobs:
     runs-on: ${{ needs.start-benchmark-runner.outputs.benchmark-label }} # run the job on the newly created runner  
     env:
       SERVER_URL: http://${{ needs.start-server-runner.outputs.private-ip }}:26379
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4

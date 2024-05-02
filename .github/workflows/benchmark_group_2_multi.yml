@@ -20,7 +20,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -44,7 +44,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -75,7 +75,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -106,7 +106,7 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.GROUP_2_GH_PERSONAL_ACCESS_TOKEN }}
-          ec2-image-id: ami-0e3fc2495b3f754f0
+          ec2-image-id: ami-0e32867d4788a0c78
           ec2-instance-type: c5.xlarge
           subnet-id: subnet-0f0b102aeba4b75f7
           security-group-id: sg-01dbe69e3eaf89995
@@ -132,6 +132,7 @@ jobs:
       NODE_1_IP: ${{ needs.start-server-1-runner.outputs.private-ip }}
       NODE_2_IP: ${{ needs.start-server-2-runner.outputs.private-ip }}
       NODE_3_IP: ${{ needs.start-server-3-runner.outputs.private-ip }}
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -166,6 +167,7 @@ jobs:
       NODE_1_IP: ${{ needs.start-server-1-runner.outputs.private-ip }}
       NODE_2_IP: ${{ needs.start-server-2-runner.outputs.private-ip }}
       NODE_3_IP: ${{ needs.start-server-3-runner.outputs.private-ip }}
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -200,6 +202,7 @@ jobs:
       NODE_1_IP: ${{ needs.start-server-1-runner.outputs.private-ip }}
       NODE_2_IP: ${{ needs.start-server-2-runner.outputs.private-ip }}
       NODE_3_IP: ${{ needs.start-server-3-runner.outputs.private-ip }}
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
@@ -232,6 +235,7 @@ jobs:
       SERVER_1_URL: http://${{ needs.start-server-1-runner.outputs.private-ip }}:26379
       SERVER_2_URL: http://${{ needs.start-server-2-runner.outputs.private-ip }}:26379
       SERVER_3_URL: http://${{ needs.start-server-3-runner.outputs.private-ip }}:26379
+      RUSTC_WRAPPER: /root/.cargo/bin/sccache
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
