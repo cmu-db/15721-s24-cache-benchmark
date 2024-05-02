@@ -1,5 +1,8 @@
 name: benchmark-group-2-multi
-on: [pull_request, push]
+on:
+  push:
+    tags:
+      - multi_server
 jobs:
   start-benchmark-runner:
     name: Start self-hosted EC2 runner
