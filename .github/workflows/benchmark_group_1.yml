@@ -81,7 +81,7 @@ jobs:
         run: cargo build --package storage-node --bin storage_node # Should not compile from scratch
       - name: Run Server
         run: |
-          cargo run --package storage-node --bin storage_node -- -data-store-cache-num 9
+          cargo run --package storage-node --bin storage_node -- --data-store-cache-num 9
   run-benchmark:
     name: Run Benchmark
     needs: 
