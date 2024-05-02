@@ -152,7 +152,7 @@ jobs:
           sleep 5
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: spin
-        run: sleep 60
+        run: sleep 80
       - name: Server shut down and log
         run: cat ${{ github.workspace }}/logs/app_6379.log
   run-server-2:
@@ -186,7 +186,7 @@ jobs:
           sleep 5
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: spin
-        run: sleep 60
+        run: sleep 80
       - name: Server shut down and log
         run: cat ${{ github.workspace }}/logs/app_6379.log
   run-server-3:
@@ -220,7 +220,7 @@ jobs:
           sleep 5
           cat ${{ github.workspace }}/logs/app_6379.log
       - name: spin
-        run: sleep 60
+        run: sleep 80
       - name: Server shut down and log
         run: cat ${{ github.workspace }}/logs/app_6379.log
   run-benchmark:
