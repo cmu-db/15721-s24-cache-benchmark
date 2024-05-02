@@ -53,7 +53,7 @@ pub async fn run_trace(
             sleep(diff);
         }
         let tx = tx.clone();
-        let client = client_builder();
+        let mut client = client_builder();
         tokio::spawn(async move {
             let table_id = match trace.request.data_request() {
                 DataRequest::Table(id) => id.clone(),
