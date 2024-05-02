@@ -2,3 +2,5 @@
 /bench_files/*
 
 **/.DS_Store
+
+logs/*
