@@ -1783,9 +1783,9 @@ dependencies = [
 
 [[package]]
 name = "parpulse-client"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ebb0215643e6fe06a91039bc36efe689b0bbde994beedf03baed17d90bc2b7e"
+checksum = "b5a091ec4dbf4b2377763f636eb095effd3ac96f6770b66f08d92b8b57748dec"
 dependencies = [
  "anyhow",
  "arrow",
