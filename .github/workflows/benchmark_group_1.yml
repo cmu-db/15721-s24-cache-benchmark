@@ -93,7 +93,7 @@ jobs:
       - name: Clone Server
         uses: actions/checkout@v4
         with:
-          ref: cache1-bench
+          ref: yx/test-sqlite
       - name: Build Benchmark driver
         run: cargo build
       - name: Wait for server
