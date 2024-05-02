@@ -230,8 +230,8 @@ jobs:
     env:
       SERVER_URL: http://${{ needs.start-server-1-runner.outputs.private-ip }}:26379
       SERVER_1_URL: http://${{ needs.start-server-1-runner.outputs.private-ip }}:26379
-      SERVER_2_URL: http://${{ needs.start-server-2-runner.outputs.private-ip }}:26380
-      SERVER_3_URL: http://${{ needs.start-server-3-runner.outputs.private-ip }}:26381
+      SERVER_2_URL: http://${{ needs.start-server-2-runner.outputs.private-ip }}:26379
+      SERVER_3_URL: http://${{ needs.start-server-3-runner.outputs.private-ip }}:26379
     steps:
       - name: Clone Server
         uses: actions/checkout@v4
