@@ -14,10 +14,10 @@ async fn main() {
 
     // let trace = parse_trace(PathBuf::from("traces/trace_1m.csv")).unwrap();
     // run_trace(trace, &utils::setup_client_1).await;
-    // let trace = parse_trace(PathBuf::from("traces/trace_100m.csv")).unwrap();
-    // run_trace(trace, &utils::setup_client_1).await;
+    let trace = parse_trace(PathBuf::from("traces/trace_100m.csv")).unwrap();
+    run_trace(trace, &utils::setup_client_1).await;
     // let trace = parse_trace(PathBuf::from("traces/trace_parallel.csv")).unwrap();
     // run_trace(trace, &utils::setup_client_1).await;
-    let trace = parse_trace(PathBuf::from("traces/trace_serial.csv")).unwrap();
-    run_trace(trace, &utils::setup_client_1).await;
+    // let trace = parse_trace(PathBuf::from("traces/trace_serial.csv")).unwrap();
+    // run_trace(trace, &utils::setup_client_1).await;
 }
