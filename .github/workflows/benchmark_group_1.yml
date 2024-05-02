@@ -2,10 +2,10 @@ name: benchmark-group-1
 on: 
   push:
     branches:
-      - cache1-bench
+      - cache1-bench-evict
   pull_request:
     branches:
-      - cache1-bench
+      - cache1-bench-evict
   workflow_dispatch:
 jobs:
   start-runner:
@@ -93,7 +93,7 @@ jobs:
       - name: Clone Server
         uses: actions/checkout@v4
         with:
-          ref: cache1-bench
+          ref: cache1-bench-evict
       - name: Build Benchmark driver
         run: cargo build
       - name: Wait for server
